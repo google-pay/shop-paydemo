@@ -11,6 +11,7 @@
     "build": "npm run build:prpl-server && npm run build:static",
     "build:prpl-server": "polymer build --auto-base-path && gulp prpl-server",
     "build:static": "polymer build",
+    "build:firebase:hosting": "npm run build:static -- --name default --add-service-worker && cp -r .well-known build/default/.well-known",
     "serve:prpl-server": "prpl-server --root server/build",
     "serve:static": "polymer serve --port 5000 build/es5-bundled",
     "test": "rm -rf build/ && polymer lint && polymer test"

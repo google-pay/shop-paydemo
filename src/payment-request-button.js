@@ -12,41 +12,42 @@ const emptyPaymentDetails = {
 };
 
 class PaymentRequestButton extends PolymerElement {
-
   static get template() {
     return html`
-    <style>
-      :host {
-        display: none;
-      }
+      <style>
+        :host {
+          display: none;
+        }
 
-      button {
-        background-color: #fff;
-        color: var(--app-primary-color);
-        border: 2px solid #000;
-        width: 100%;
-        padding: 8px 44px;
-        font-size: 14px;
-        font-weight: 500;
-        display: block;
-        text-transform: uppercase;
-      }
+        button {
+          background-color: #fff;
+          color: var(--app-primary-color);
+          border: 2px solid #000;
+          width: 100%;
+          padding: 8px 44px;
+          font-size: 14px;
+          font-weight: 500;
+          display: block;
+          text-transform: uppercase;
+        }
 
-      button:focus {
-        background-color: #c5cad3;
-      }
+        button:focus {
+          background-color: #c5cad3;
+        }
 
-      button:active {
-        background-color: #000;
-        color: #fff;
-      }
-    </style>
+        button:active {
+          background-color: #000;
+          color: #fff;
+        }
+      </style>
 
-    <button on-click="_handleClick">Buy Now</button>
+      <button on-click="_handleClick">Buy Now</button>
     `;
   }
 
-  static get is() { return 'payment-request-button'; }
+  static get is() {
+    return 'payment-request-button';
+  }
 
   static get properties() {
     return {
@@ -82,16 +83,15 @@ class PaymentRequestButton extends PolymerElement {
 
   _initializeButton() {
     const paymentRequest = this._buildPaymentRequest();
-    paymentRequest.canMakePayment()
-      .then(canMakePayment => {
-        if (canMakePayment) {
-          this.style.display = 'block';
-        }
+    paymentRequest.canMakePayment().then(canMakePayment => {
+      if (canMakePayment) {
+        this.style.display = 'block';
+      }
 
-        if (this.onCanMakePaymentChange) {
-          this.onCanMakePaymentChange(canMakePayment);
-        }
-      });
+      if (this.onCanMakePaymentChange) {
+        this.onCanMakePaymentChange(canMakePayment);
+      }
+    });
   }
 
   _handleClick() {
@@ -102,19 +102,44 @@ class PaymentRequestButton extends PolymerElement {
       details.total.amount.value = total.toFixed(2);
     }
 
-    const paymentRequest = this._buildPaymentRequest({
-      shippingOptions: this.shippingOptions,
-      ...details,
-    }, {
-      requestShipping: this.requestShipping,
-    });
+    const paymentRequest = this._buildPaymentRequest(
+      {
+        ...details,
+      },
+      {
+        requestShipping: this.requestShipping,
+      },
+    );
 
-    return paymentRequest.show()
+    paymentRequest.onmerchantvalidation = event => {
+      const options = {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: event.validationURL,
+        }),
+      };
+
+      return fetch(
+        'https://us-central1-apple-merchant-validation.cloudfunctions.net/api/api/merchants/validate',
+        options,
+      ).then(response => event.complete(response.json()));
+    };
+
+    paymentRequest.onshippingaddresschange = event => {
+      event.updateWith({});
+    };
+
+    return paymentRequest
+      .show()
       .then(paymentResponse => {
         if (this.onPaymentDataResult) {
           this.onPaymentDataResult(paymentResponse);
         }
-        paymentResponse.complete();
+        return paymentResponse.complete('success');
       })
       .catch(error => {
         if (this.onError) {

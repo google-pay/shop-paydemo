@@ -3,21 +3,21 @@ import loadScript from './load-script.js';
 import Settings from './settings.js';
 
 class GooglePayButton extends PolymerElement {
-
   static get template() {
     return html`
-    <style>
-      :host {
-        display: inline-block;
-      }
-    </style>
+      <style>
+        :host {
+          display: inline-block;
+        }
+      </style>
 
-    <div id="container">
-    </div>
+      <div id="container"></div>
     `;
   }
 
-  static get is() { return 'google-pay-button'; }
+  static get is() {
+    return 'google-pay-button';
+  }
 
   static get properties() {
     return {
@@ -30,7 +30,7 @@ class GooglePayButton extends PolymerElement {
         value: {
           major: 2,
           minor: 0,
-        }
+        },
       },
       emailRequired: Boolean,
       existingPaymentMethodRequired: Boolean,
@@ -48,15 +48,15 @@ class GooglePayButton extends PolymerElement {
         value: {
           buttonColor: 'default',
           buttonType: 'long',
-        }
+        },
       },
       transactionInfo: Object,
     };
   }
 
-  static get observers() { return [
-    '_propertiesChanged(allowedPaymentMethods)'
-  ]}
+  static get observers() {
+    return ['_propertiesChanged(allowedPaymentMethods)'];
+  }
 
   constructor() {
     super();
@@ -90,7 +90,7 @@ class GooglePayButton extends PolymerElement {
         clientConfig.paymentDataCallbacks.onPaymentAuthorized = (...args) => {
           const result = onPaymentAuthorized(...args, this._paymentRequest);
           return result || {};
-        }
+        };
       }
     }
 
@@ -155,16 +155,22 @@ class GooglePayButton extends PolymerElement {
       .then(readyToPayResponse => {
         let isReadyToPay = false;
 
-        if ((this.existingPaymentMethodRequired && readyToPayResponse.paymentMethodPresent && readyToPayResponse.result)
-          || (!this.existingPaymentMethodRequired && readyToPayResponse.result)) {
+        if (
+          (this.existingPaymentMethodRequired &&
+            readyToPayResponse.paymentMethodPresent &&
+            readyToPayResponse.result) ||
+          (!this.existingPaymentMethodRequired && readyToPayResponse.result)
+        ) {
           const appearance = this.appearance;
           const button = this._client.createButton({
             buttonColor: appearance.buttonColor,
             buttonType: appearance.buttonType,
             onClick: this._handleClick,
+            buttonRootNode: this.shadowRoot,
+            buttonStyleMode: 'fill',
           });
 
-          this._copyGPayStyles();
+          // this._copyGPayStyles();
           const container = this.shadowRoot.getElementById('container');
 
           if (container.firstChild) {
@@ -200,15 +206,19 @@ class GooglePayButton extends PolymerElement {
 
         return isReadyToPay;
       })
-      .then(() => this._client.prefetchPaymentData(this._buildPaymentRequest({
-        transactionInfo: {
-          totalPriceStatus: 'FINAL',
-          totalPriceLabel: 'Total',
-          totalPrice: '0',
-          currencyCode: 'USD',
-          countryCode: 'US',
-        }
-      })))
+      .then(() =>
+        this._client.prefetchPaymentData(
+          this._buildPaymentRequest({
+            transactionInfo: {
+              totalPriceStatus: 'FINAL',
+              totalPriceLabel: 'Total',
+              totalPrice: '0',
+              currencyCode: 'USD',
+              countryCode: 'US',
+            },
+          }),
+        ),
+      )
       .catch(error => {
         console.error(error);
       });
@@ -222,7 +232,8 @@ class GooglePayButton extends PolymerElement {
     const paymentRequest = this._buildPaymentRequest(this);
     this._paymentRequest = paymentRequest;
 
-    this._client.loadPaymentData(paymentRequest)
+    this._client
+      .loadPaymentData(paymentRequest)
       .then(paymentResponse => {
         if (this.onPaymentDataResult) {
           this.onPaymentDataResult(paymentResponse);

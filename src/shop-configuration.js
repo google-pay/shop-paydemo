@@ -43,16 +43,20 @@ export default {
     },
     onPaymentDataResponse: function (paymentResponse, context) {
       console.log('Success', paymentResponse);
-      this.dispatchEvent(new CustomEvent('payment-selected', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          paymentResponse,
-          context: typeof context === 'function' ? context() : context,
-        }
-      }));
+      this.dispatchEvent(
+        new CustomEvent('payment-selected', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            paymentResponse,
+            context: typeof context === 'function' ? context() : context,
+          },
+        }),
+      );
     },
-    onPaymentAuthorized: function () { return { transactionState: 'SUCCESS'}; },
+    onPaymentAuthorized: function () {
+      return { transactionState: 'SUCCESS' };
+    },
   },
   paymentrequest: {
     paymentMethods: [
@@ -60,6 +64,17 @@ export default {
         supportedMethods: 'basic-card',
         data: {
           supportedNetworks: ['visa', 'mastercard', 'amex'],
+        },
+      },
+      {
+        supportedMethods: 'https://apple.com/apple-pay',
+        data: {
+          version: 3,
+          countryCode: 'US',
+          currencyCode: 'USD',
+          supportedNetworks: ['visa', 'masterCard', 'amex'],
+          merchantCapabilities: ['supports3DS'],
+          merchantIdentifier: 'merchant.com.socsieng.tshirt-shop-demo',
         },
       },
     ],
@@ -72,19 +87,21 @@ export default {
           value: '0.00',
         },
         selected: true,
-      }
+      },
     ],
     requestShipping: true,
     onPaymentDataResponse: function (paymentResponse, context) {
       console.log('Success', paymentResponse);
-      this.dispatchEvent(new CustomEvent('payment-selected', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          paymentResponse,
-          context: typeof context === 'function' ? context() : context,
-        }
-      }));
+      this.dispatchEvent(
+        new CustomEvent('payment-selected', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            paymentResponse,
+            context: typeof context === 'function' ? context() : context,
+          },
+        }),
+      );
     },
   },
 };
