@@ -17,7 +17,7 @@ jobs:
       with:
         node-version: '20.x'
     - name: Use Google Cloud CLI
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@main
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
