@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 name: Revoke GCP Key
 
 on:
@@ -21,5 +20,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Revoke Firebase Token
-      run: curl -H "Content-type:application/x-www-form-urlencoded" -s https://accounts.google.com/o/oauth2/revoke?token=${{secrets.GCP_SA_KEY}}
+    - name: Use Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+    - name: Revoke GCP key
+      run: gcloud revoke ${{ secrets.GCP_SA_EMAIL }}
