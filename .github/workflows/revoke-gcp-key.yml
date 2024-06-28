@@ -25,4 +25,4 @@ jobs:
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
     - name: Revoke GCP key
-      run: gcloud revoke ${{ secrets.GCP_SA_EMAIL }}
+      run: gcloud auth revoke ${{ secrets.GCP_SA_EMAIL }}
